@@ -1,11 +1,11 @@
-import { Box,Text, Button,  Heading, Image, Input } from '@chakra-ui/react'
+import { Box,Text, Button,  Heading, Image, Input,  } from '@chakra-ui/react'
 import {Component} from 'react'
 
 import './App.css'
 
 class App extends Component {
  state = {longitude : "", latitude : "", data : [], deviceLocation : false,
- searchLocationShows : false ,name : "" , }
+ searchLocationShows : false ,name : "" , serachError : ''}
 
   componentDidMount() {
     navigator.geolocation.getCurrentPosition(position => (
@@ -75,7 +75,7 @@ class App extends Component {
             </div>
             </div>
           </div>
-      )
+      ) 
     }
 
     searchLocation =  () => {
@@ -85,6 +85,9 @@ class App extends Component {
     onInputSubmit = async event => {
       event.preventDefault()
       const {name} = this.state
+      if (name === ""){
+        this.setState({serachError : "*Enter Valid Location"})
+      }
       const response = await fetch(`https://api.weatherapi.com/v1/current.json?key=9ac7d643b60e48f990a65231231303&q=${name}&aqi=yes`)
    const data = await response.json()
      const gettingData = {
@@ -101,7 +104,8 @@ class App extends Component {
        windDirecion : data.current.wind_dir,
        windSpeed : data.current.wind_kph
      } 
-     this.setState({data : gettingData, deviceLocation : true, name : ""})
+     this.setState({data : gettingData, deviceLocation : true})
+     this.setState({ name: '' });
      
     }
   
@@ -111,7 +115,8 @@ class App extends Component {
     
 
 render() {
-  const {deviceLocation } = this.state
+  const {deviceLocation,serachError } = this.state
+  console.log(serachError)
   return (
     <div className="App">
       <Box bgGradient="linear(to-r, teal.500, blue.500)"
@@ -134,11 +139,12 @@ render() {
       <Input color='white' 
         _placeholder={{ color: 'inherit' }} width="210px"  size='sm' placeholder='search location' onChange={this.onChangeName} /> &nbsp;&nbsp;
       <Button mb='1' colorScheme='gray' size='sm' type="submit" className="button">
-          Add Contact
+          Search
       </Button>
       </form>
-      {deviceLocation && <h1>{this.weatherReports()}</h1>}
+      {deviceLocation ? <h1>{this.weatherReports()}</h1> : <Text fontFamily="-moz-initial" fontWeight='none' color='red'>{serachError}</Text>}
       </Box>
+      
     </div>
   );
 }
